@@ -4,24 +4,25 @@ import { TranslateRequest } from "./index";
 export const translateServerFn = createServerFn({ method: "POST" })
   .validator((d: TranslateRequest) => d)
   .handler(async ({ data }) => {
-    // Read the GEMINI_API_KEY from environment variables.
-    // Try both upper and lower case variants to be safe.
-    const apiKey = process.env["GEMINI_API_KEY"] || process.env["gemini_api_key"];
+    // Universal OpenAI-Compatible API credentials to hide provider brand completely in public repo
+    const apiKey = process.env["AI_API_KEY"];
+    const apiUrl = process.env["AI_API_URL"];
+    const model = process.env["AI_MODEL"];
 
-    if (!apiKey) {
-      console.warn("GEMINI_API_KEY environment variable is not defined.");
-      return { success: false, error: "GEMINI_API_KEY is not configured" };
+    if (!apiKey || !apiUrl || !model) {
+      console.warn("AI configurations (AI_API_KEY, AI_API_URL, or AI_MODEL) are not fully configured.");
+      return { success: false, error: "AI API is not fully configured" };
     }
 
     const { text, from, to } = data;
 
-    // 1. Build the translation guidelines and few-shot examples
+    // 1. Build translation guidelines and few-shot examples
     let systemInstruction = "";
     let fewShots: Array<{ input: string; output: string }> = [];
 
     if (from === "karaoke" && to === "th") {
       // Secret prompt read from environment variables to protect intellectual property on public repository
-      const secretPrompt = process.env["GEMINI_SYSTEM_PROMPT_KARAOKE_TO_THAI"];
+      const secretPrompt = process.env["AI_SYSTEM_PROMPT_KARAOKE_TO_THAI"];
 
       if (secretPrompt) {
         // Replace literal \n with real newline characters if loaded from env string
@@ -29,7 +30,7 @@ export const translateServerFn = createServerFn({ method: "POST" })
       } else {
         // Public fallback prompt stub
         systemInstruction = `You are a professional translator translating informal Thai karaoke language (Thai phonetics written in the Roman/English alphabet) into natural, grammatically correct standard Thai.
-Your main goal is to understand the context of the entire sentence to resolve ambiguous homophones (like "mai", "glai", "tee", "mun").`;
+Your main goal is to understand the context of the entire sentence to resolve ambiguous homophones.`;
       }
 
       fewShots = [
@@ -44,14 +45,14 @@ Your main goal is to understand the context of the entire sentence to resolve am
       ];
     } else {
       // Secret prompt read from environment variables to protect intellectual property on public repository
-      const secretPrompt = process.env["GEMINI_SYSTEM_PROMPT_THAI_TO_KARAOKE"];
+      const secretPrompt = process.env["AI_SYSTEM_PROMPT_THAI_TO_KARAOKE"];
 
       if (secretPrompt) {
         // Replace literal \n with real newline characters if loaded from env string
         systemInstruction = secretPrompt.replace(/\\n/g, "\n");
       } else {
         // Public fallback prompt stub
-        systemInstruction = `You are a professional translator Romanizing Thai language into conversational karaoke language (phonetic English spelling) commonly used by Thai youths and international school students in chats.`;
+        systemInstruction = `You are a professional translator Romanizing Thai language into conversational karaoke language commonly used by Thai youths and international school students in chats.`;
       }
 
       fewShots = [
@@ -62,63 +63,55 @@ Your main goal is to understand the context of the entire sentence to resolve am
       ];
     }
 
-    // 2. Call Google Gemini API (using gemini-1.5-flash for speed and cost efficiency)
-    const model = "gemini-2.5-flash";
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    // Clean trailing slash from URL
+    const cleanApiUrl = apiUrl.replace(/\/$/, "");
 
-    // Structure contents as a clean multi-turn few-shot conversation
-    const contents: Array<any> = [
-      {
-        role: "user",
-        parts: [
-          { text: `System Instruction:\n${systemInstruction}` }
-        ]
-      }
+    // 2. Build standard OpenAI-compatible message payload
+    const messages: Array<any> = [
+      { role: "system", content: systemInstruction }
     ];
 
     // Append few-shots
     for (const shot of fewShots) {
-      contents.push({
+      messages.push({
         role: "user",
-        parts: [{ text: `Translate this text:\n"${shot.input}"` }]
+        content: `Translate this text:\n"${shot.input}"`
       });
-      contents.push({
-        role: "model",
-        parts: [{ text: shot.output }]
+      messages.push({
+        role: "assistant",
+        content: shot.output
       });
     }
 
-    // Append current input
-    contents.push({
+    // Append target text
+    messages.push({
       role: "user",
-      parts: [{ text: `Translate this text:\n"${text}"` }]
+      content: `Translate this text:\n"${text}"`
     });
 
-    const promptPayload = {
-      contents,
-      generationConfig: {
-        temperature: 0.1, // low temperature to make translations precise and consistent
-        maxOutputTokens: 1024,
-      }
-    };
-
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${cleanApiUrl}/chat/completions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
         },
-        body: JSON.stringify(promptPayload),
+        body: JSON.stringify({
+          model: model,
+          messages: messages,
+          temperature: 0.1,
+          max_tokens: 1024
+        })
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Gemini API request failed:", errorText);
-        return { success: false, error: `Gemini API responded with status ${response.status}` };
+        console.error("AI API request failed:", errorText);
+        return { success: false, error: `API responded with status ${response.status}` };
       }
 
       const json = (await response.json()) as any;
-      const translatedText = json.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      const translatedText = json.choices?.[0]?.message?.content || "";
 
       // Post-process the output to strip unwanted quotes or spacing
       let cleanText = translatedText.trim();
@@ -131,7 +124,7 @@ Your main goal is to understand the context of the entire sentence to resolve am
 
       return { success: true, translatedText: cleanText.trim() };
     } catch (err: any) {
-      console.error("Network or internal error calling Gemini API:", err);
+      console.error("Network or internal error calling AI API:", err);
       return { success: false, error: err.message || "Network request failed" };
     }
   });

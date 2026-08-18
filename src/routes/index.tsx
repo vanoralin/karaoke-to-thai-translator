@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeftRight, Check, Copy, Loader2 } from "lucide-react";
+import { ArrowLeftRight, Check, ChevronDown, Copy, Heart, Loader2 } from "lucide-react";
 import { translate, type Lang } from "@/lib/translate";
 
 export const Route = createFileRoute("/")({
@@ -36,6 +36,7 @@ function Index() {
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const to: Lang = from === "th" ? "karaoke" : "th";
 
@@ -71,35 +72,76 @@ function Index() {
             alt="KaraThai Logo"
             className="size-10 rounded-xl object-contain sm:size-12"
           />
-          <h1 className="text-4xl font-extrabold tracking-tight text-primary-dark sm:text-5xl">
+          <h1 className="text-4xl font-extrabold tracking-tight text-[#12a4b7] sm:text-5xl">
             Karaoke-to-Thai
           </h1>
         </div>
         <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
-          เว็บแปลภาษาคาราโอเกะ ↔ ไทย ไม่ต้องล็อคอิน ไม่เสียเงิน
+          เว็บแปลภาษาคาราโอเกะ ↔ ไทย ใช้ได้เลยไม่ต้องล็อคอิน
         </p>
       </header>
 
-      <section className="mx-auto mt-10 w-full max-w-5xl rounded-[20px] border border-border bg-card p-5 shadow-card sm:mt-14 sm:p-8">
+      <section className="mx-auto mt-10 w-full max-w-5xl rounded-4xl border border-border bg-card p-5 shadow-card sm:mt-14 sm:p-8">
         <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-[1fr_auto_1fr] md:gap-5">
           {/* Input */}
           <div className="flex flex-col gap-3">
             <label className="text-sm font-semibold text-foreground" htmlFor="source">
               ภาษาต้นทาง
             </label>
-            <select
-              id="source-lang"
-              aria-label="เลือกภาษาต้นทาง"
-              value={from}
-              onChange={(e) => {
-                setFrom(e.target.value as Lang);
-                setOutput("");
-              }}
-              className="w-full rounded-2xl border border-border bg-secondary/60 px-4 py-2.5 text-sm font-medium text-foreground outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/30"
-            >
-              <option value="th">ไทย</option>
-              <option value="karaoke">Karaoke</option>
-            </select>
+            <div className="relative">
+              <button
+                type="button"
+                id="source-lang-btn"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex w-full items-center justify-between rounded-2xl border border-border bg-secondary/60 px-4 py-3 text-sm font-medium text-foreground outline-none transition-all hover:bg-secondary focus:border-primary focus:ring-2 focus:ring-primary/25 cursor-pointer"
+              >
+                <span>{from === "th" ? "ไทย" : "Karaoke"}</span>
+                <ChevronDown className={`size-4 text-muted-foreground transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {isDropdownOpen && (
+                <>
+                  {/* Backdrop overlay to close on click outside */}
+                  <div
+                    className="fixed inset-0 z-30"
+                    onClick={() => setIsDropdownOpen(false)}
+                  />
+                  {/* Dropdown Menu */}
+                  <div className="absolute left-0 right-0 mt-2 z-40 origin-top rounded-2xl border border-border bg-card p-1.5 shadow-card animate-in fade-in slide-in-from-top-2 duration-200">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFrom("th");
+                        setOutput("");
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${from === "th"
+                        ? "bg-primary-light text-primary-dark"
+                        : "text-foreground hover:bg-secondary/60"
+                        }`}
+                    >
+                      <span>ไทย</span>
+                      {from === "th" && <Check className="size-4" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFrom("karaoke");
+                        setOutput("");
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer ${from === "karaoke"
+                        ? "bg-primary-light text-primary-dark"
+                        : "text-foreground hover:bg-secondary/60"
+                        }`}
+                    >
+                      <span>Karaoke</span>
+                      {from === "karaoke" && <Check className="size-4" />}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
             <textarea
               id="source"
               value={input}
@@ -161,6 +203,19 @@ function Index() {
           </p>
         </div>
       </section>
+
+      <footer className="mx-auto mt-16 max-w-5xl text-center text-xs text-muted-foreground/75">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-border/60 pt-8 sm:flex-row">
+          <p>© 2026 KaraThai · เครื่องมือแปลภาษาคาราโอเกะ ↔ ภาษาไทย</p>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-1.5 text-muted-foreground/80">
+              <span>Made with</span>
+              <Heart className="size-3.5 fill-rose-500 text-rose-500 animate-pulse" />
+              <span>by vanoralin</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
