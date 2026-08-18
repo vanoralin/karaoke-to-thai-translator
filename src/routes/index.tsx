@@ -65,11 +65,18 @@ function Index() {
   return (
     <main className="min-h-screen bg-background px-4 py-12 sm:py-16">
       <header className="mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-extrabold tracking-tight text-primary-dark sm:text-5xl">
-          KaraThai
-        </h1>
+        <div className="inline-flex items-center justify-center gap-3">
+          <img
+            src="/favicon.ico"
+            alt="KaraThai Logo"
+            className="size-10 rounded-xl object-contain sm:size-12"
+          />
+          <h1 className="text-4xl font-extrabold tracking-tight text-primary-dark sm:text-5xl">
+            Karaoke-to-Thai
+          </h1>
+        </div>
         <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
-          แปลภาษาคาราโอเกะ ↔ ไทย จากเสียงที่คุณตั้งใจสื่อ
+          เว็บแปลภาษาคาราโอเกะ ↔ ไทย ไม่ต้องล็อคอิน ไม่เสียเงิน
         </p>
       </header>
 
