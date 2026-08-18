@@ -6,19 +6,21 @@ import { translate, type Lang } from "@/lib/translate";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "KaraThai — แปลภาษาคาราโอเกะ ↔ ไทย" },
+      { title: "KaraThai — แปลภาษาคาราโอเกะเป็นไทย" },
       {
         name: "description",
         content:
-          "เครื่องมือแปลภาษาคาราโอเกะเป็นภาษาไทยและไทยเป็นคาราโอเกะ ตีความจากเสียงและบริบท ใช้งานง่ายในหน้าเดียว",
+          "เครื่องมือแปล ภาษาคาราโอเกะเป็นภาษาไทย และ ไทยเป็นคาราโอเกะ ตีความจากเสียงและบริบท ใช้ได้เลยไม่ต้องล็อคอิน",
       },
-      { property: "og:title", content: "KaraThai — แปลภาษาคาราโอเกะ ↔ ไทย" },
+      { property: "og:title", content: "KaraThai — แปลภาษาคาราโอเกะเป็นไทย" },
       {
         property: "og:description",
-        content: "พิมพ์ แปล คัดลอก แปลคาราโอเกะ ↔ ไทย จากเสียงที่คุณตั้งใจสื่อ",
+        content: "ใช้งานได้เลย โดยไม่ต้องล็อคอิน",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://karaoke-to-thai-translator.vercel.app/favicon.ico" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://karaoke-to-thai-translator.vercel.app/favicon.ico" },
     ],
   }),
   component: Index,

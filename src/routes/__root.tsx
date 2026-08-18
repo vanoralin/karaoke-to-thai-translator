@@ -77,14 +77,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "แปลภาษา Karaoke เป็น Thai" },
+      { name: "description", content: "เครื่องมือแปลภาษาคาราโอเกะเป็นภาษาไทยและไทยเป็นคาราโอเกะ ใช้ได้เลยไม่ต้องล็อคอิน" },
+      { name: "author", content: "vanoralin" },
+      // link
+      { property: "og:title", content: "Karaoke-to-Thai" },
+      { property: "og:description", content: "พิมพ์ แปล คัดลอก แปลคาราโอเกะ ↔ ไทย จากเสียงที่คุณตั้งใจสื่อ" },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://karaoke-to-thai-translator.vercel.app/favicon.ico" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
