@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeftRight, Check, ChevronDown, Copy, Heart, Loader2 } from "lucide-react";
 import { translate, type Lang } from "@/lib/translate";
+import { trackEvent } from "../lib/analytics";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -51,6 +52,11 @@ function Index() {
   const handleTranslate = async () => {
     if (!input.trim() || loading) return;
     setLoading(true);
+    trackEvent("click_translate", {
+      from_lang: from,
+      to_lang: to,
+      text_length: input.trim().length,
+    });
     try {
       setOutput(await translate({ text: input, from, to }));
     } finally {

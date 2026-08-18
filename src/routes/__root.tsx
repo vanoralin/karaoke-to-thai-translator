@@ -107,11 +107,45 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+// Safe helper to read environment variables across different runtimes
+const getEnv = (key: string): string | undefined => {
+  try {
+    if (typeof process !== "undefined" && process.env) {
+      return process.env[key];
+    }
+  } catch {}
+  try {
+    if (typeof globalThis !== "undefined") {
+      return (globalThis as any)[key];
+    }
+  } catch {}
+  return undefined;
+};
+
 function RootShell({ children }: { children: ReactNode }) {
+  const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID || getEnv("VITE_GA_MEASUREMENT_ID");
+
   return (
     <html lang="en">
       <head>
         <HeadContent />
+        {gaId && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${gaId}', {
+                    page_path: window.location.pathname,
+                  });
+                `,
+              }}
+            />
+          </>
+        )}
       </head>
       <body>
         {children}
