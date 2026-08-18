@@ -56,3 +56,10 @@ When deploying this project to **Vercel**, ensure you configure the following in
 1. Add all the environment variables from your `.env` to Vercel's **Settings > Environment Variables**.
 2. **Important:** Add the environment variable **`NITRO_PRESET=vercel`** to tell the Nitro bundler to build for Vercel Serverless/Edge instead of Cloudflare.
 3. Redeploy the application and you're good to go!
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+
