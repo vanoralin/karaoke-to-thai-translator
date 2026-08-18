@@ -1,13 +1,8 @@
 import { PHRASES, WORDS, THAI_WORDS, THAI_KEYS } from "./dictionary";
 import { translateServerFn } from "./translate.functions";
+import { Lang, TranslateRequest } from "./types";
 
-export type Lang = "th" | "karaoke";
-
-export interface TranslateRequest {
-  text: string;
-  from: Lang;
-  to: Lang;
-}
+export type { Lang, TranslateRequest };
 
 /**
  * Phonetic fallback for karaoke syllables that are not in the dictionary.

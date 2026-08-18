@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { TranslateRequest } from "./index";
+import { TranslateRequest } from "./types";
 
 export const translateServerFn = createServerFn({ method: "POST" })
   .validator((d: TranslateRequest) => d)
