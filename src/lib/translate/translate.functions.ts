@@ -1,13 +1,28 @@
 import { createServerFn } from "@tanstack/react-start";
 import { TranslateRequest } from "./types";
 
+// Safe helper to read environment variables across different runtimes (Node.js, Edge, Cloudflare Workers)
+const getEnv = (key: string): string | undefined => {
+  try {
+    if (typeof process !== "undefined" && process.env) {
+      return process.env[key];
+    }
+  } catch {}
+  try {
+    if (typeof globalThis !== "undefined") {
+      return (globalThis as any)[key];
+    }
+  } catch {}
+  return undefined;
+};
+
 export const translateServerFn = createServerFn({ method: "POST" })
   .validator((d: TranslateRequest) => d)
   .handler(async ({ data }) => {
     // Universal OpenAI-Compatible API credentials to hide provider brand completely in public repo
-    const apiKey = process.env["AI_API_KEY"];
-    const apiUrl = process.env["AI_API_URL"];
-    const model = process.env["AI_MODEL"];
+    const apiKey = getEnv("AI_API_KEY");
+    const apiUrl = getEnv("AI_API_URL");
+    const model = getEnv("AI_MODEL");
 
     if (!apiKey || !apiUrl || !model) {
       console.warn("AI configurations (AI_API_KEY, AI_API_URL, or AI_MODEL) are not fully configured.");
@@ -22,7 +37,7 @@ export const translateServerFn = createServerFn({ method: "POST" })
 
     if (from === "karaoke" && to === "th") {
       // Secret prompt read from environment variables to protect intellectual property on public repository
-      const secretPrompt = process.env["AI_SYSTEM_PROMPT_KARAOKE_TO_THAI"];
+      const secretPrompt = getEnv("AI_SYSTEM_PROMPT_KARAOKE_TO_THAI");
 
       if (secretPrompt) {
         // Replace literal \n with real newline characters if loaded from env string
@@ -45,7 +60,7 @@ Your main goal is to understand the context of the entire sentence to resolve am
       ];
     } else {
       // Secret prompt read from environment variables to protect intellectual property on public repository
-      const secretPrompt = process.env["AI_SYSTEM_PROMPT_THAI_TO_KARAOKE"];
+      const secretPrompt = getEnv("AI_SYSTEM_PROMPT_THAI_TO_KARAOKE");
 
       if (secretPrompt) {
         // Replace literal \n with real newline characters if loaded from env string
